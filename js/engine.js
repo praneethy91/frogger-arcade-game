@@ -135,7 +135,11 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
-
+        /* Necessary since the player's head reaches an area which is redrawn
+         * with the transparent alpha value of the water sprite so need to
+         * clear the top of the player's head.
+        */
+        removeArtifacts();
         renderEntities();
     }
 
@@ -143,6 +147,13 @@ var Engine = (function(global) {
      * tick. Its purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
+     function removeArtifacts() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, 50);
+        /*The below one is not necessary as the player will not move in that area*/
+        ctx.fillRect(0, 586, canvas.width, canvas.height - 586);
+     }
+
     function renderEntities() {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
