@@ -10,6 +10,11 @@ var Enemy = function(x, y) {
     this.setRandomSpeed();
 };
 
+var playerStartX = 202;
+var playerStartY = 380;
+var allEnemies = [];
+var player;
+
 Enemy.prototype.setRandomSpeed = function(){
     this.speed = 250 + Math.floor(Math.random() * 300);
 }
@@ -41,8 +46,31 @@ var Player = function(x, y) {
     this.sprite = 'images/char-boy.png';
 }
 Player.prototype.update = function() {
-    // Do nothing, most of the updating for instance variables
-    // happens in the handleInput
+
+    function winPosition(){
+        if(this.y === playerStartY - 83*5) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function collisionOccured() {
+        var collided = false;
+        for(var i = 0; i < allEnemies.length ;i++) {
+            if(Math.abs(allEnemies[i].x - this.x) <= 60 &&
+                Math.abs(allEnemies[i].y - this.y) <= 20) {
+                collided = true;
+            }
+        }
+
+        return collided;
+    }
+
+    if(winPosition.call(this) || collisionOccured.call(this)) {
+        this.x = playerStartX;
+        this.y = playerStartY;
+    }
 }
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -90,26 +118,16 @@ Player.prototype.handleInput = function(key) {
 
     handleChange.call(this, changeX, changeY);
 }
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
 
-var allEnemies = [];
-(function createEnemies(){
+function createEnemies(){
     for(var i = 0; i < 3; i++) {
         allEnemies.push(new Enemy());
     }
-})();
+}
 
-var player = new Player(202, 380);
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+createEnemies();
+player = new Player(playerStartX, playerStartY);
 
-
-
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
