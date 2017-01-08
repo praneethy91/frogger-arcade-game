@@ -1,54 +1,65 @@
-// Enemies our player must avoid
-var Enemy = function(x, y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug.png';
-    this.setRandomPosition();
-    this.setRandomSpeed();
+//Superclass of all the renderable objects in game
+var Entity = function(sprite, x, y) {
+    this.sprite = sprite;
+    this.x = x;
+    this.y = y;
+}
+Entity.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-var playerStartX = 202;
-var playerStartY = 380;
-var allEnemies = [];
-var player;
+// Enemies our player must avoid
+var Enemy = function() {
+    var sprite = 'images/enemy-bug.png';
+    var position = this.getRandomPosition();
+    this.speed = this.getRandomSpeed();
+    Entity.call(this, sprite, position.x, position.y);
+};
+Enemy.prototype = Object.create(Entity.prototype);
+Enemy.prototype.constructor = Enemy;
 
-Enemy.prototype.setRandomSpeed = function(){
-    this.speed = 250 + Math.floor(Math.random() * 300);
+/* getRandomSpeed() is an Enemy prototype function as it's specific to
+ * how the enemy moves
+ */
+Enemy.prototype.getRandomSpeed = function(){
+    return 250 + Math.floor(Math.random() * 300);
 }
 
-Enemy.prototype.setRandomPosition = function(){
+/* getRandomPosition() is an Enemy prototype function as it's specific to
+ * how the enemy is positioned on the canvas
+ */
+Enemy.prototype.getRandomPosition = function(){
+    var position = {};
     var enemyRow = 0 + Math.floor(Math.random() * 3);
-    this.x = -80;
-    this.y = 65 + 83*enemyRow;
+    position.x = -80;
+    position.y = 65 + 83*enemyRow;
+    return position;
 }
-
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
     this.x += dt*this.speed;
     if(this.x > 505) {
-        this.setRandomPosition();
-        this.setRandomSpeed();
+        var position = this.getRandomPosition();
+        this.speed = this.getRandomSpeed();
+        this.x = position.x;
+        this.y = position.y;
     }
 };
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-var Player = function(x, y) {
-    this.x = x;
-    this.y = y;
-    this.sprite = 'images/char-boy.png';
+var Player = function() {
+    var sprite = 'images/char-boy.png';
+    Entity.call(this, sprite, this.PLAYERSTARTX, this.PLAYERSTARTY);
 }
+Player.prototype = Object.create(Entity.prototype);
+
+Player.prototype.PLAYERSTARTX = 202;
+Player.prototype.PLAYERSTARTY = 380;
+Player.prototype.constructor = Player;
 Player.prototype.update = function() {
 
     function winPosition(){
-        if(this.y === playerStartY - 83*5) {
+        if(this.y === this.PLAYERSTARTY - 83*5) {
             return true;
         }
 
@@ -68,13 +79,10 @@ Player.prototype.update = function() {
     }
 
     if(winPosition.call(this) || collisionOccured.call(this)) {
-        this.x = playerStartX;
-        this.y = playerStartY;
+        this.x = this.PLAYERSTARTX;
+        this.y = this.PLAYERSTARTY;
     }
 }
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 Player.prototype.handleInput = function(key) {
 
     function handleChange(changeX, changeY) {
@@ -119,15 +127,15 @@ Player.prototype.handleInput = function(key) {
     handleChange.call(this, changeX, changeY);
 }
 
-function createEnemies(){
-    for(var i = 0; i < 3; i++) {
-        allEnemies.push(new Enemy());
-    }
+// Instantiating the enemy array and the player.
+var allEnemies = [];
+var player;
+for(var i = 0; i < 3; i++) {
+    allEnemies.push(new Enemy());
 }
+player = new Player();
 
-createEnemies();
-player = new Player(playerStartX, playerStartY);
-
+//Adding the listener for the keys which move the player
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
