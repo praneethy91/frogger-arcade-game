@@ -9,20 +9,34 @@ var GameConditionEnum = {
  */
 var GameState = function(){
     this.gameCondition = GameConditionEnum.Playing;
+
     this.score = 0;
-    this.x = 10;
-    this.y = 80;
+    this.scoreX = 10;
+    this.scoreY = 80;
+
+    this.highScore = 0;
+    this.highScoreX = 10;
+    this.highScoreY = 110;
+
     this.changeScoreBy = function(scoreChange) {
         this.score += scoreChange;
-        if(this.score < 0){
-            this.score = 0;
-            this.gameCondition = GameConditionEnum.Lose;
+        if(this.score > this.highScore) {
+            this.highScore = this.score;
+        }
+        else if(this.score < 0){
+            this.lostGame();
         }
     }
+    this.lostGame = function() {
+        this.score = 0;
+        this.gameCondition = GameConditionEnum.Lose;
+    }
+
     this.render = function() {
         ctx.fillStyle = "yellow";
         ctx.font = "32px sans-serif";
-        ctx.fillText("Score: " + this.score, this.x, this.y);
+        ctx.fillText("Score: " + this.score, this.scoreX, this.scoreY);
+        ctx.fillText("High Score: " + this.highScore, this.highScoreX, this.highScoreY);
     }
 };
 
@@ -101,7 +115,7 @@ Player.prototype.update = function() {
         for(var i = 0; i < allEnemies.length ;i++) {
             if(Math.abs(allEnemies[i].x - this.x) <= 60 &&
                 Math.abs(allEnemies[i].y - this.y) <= 20) {
-                gameState.changeScoreBy(-100);
+                gameState.lostGame();
                 collided = true;
             }
         }
