@@ -5,17 +5,29 @@ var Enemy = function(x, y) {
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.x = x;
-    this.y = y;
     this.sprite = 'images/enemy-bug.png';
+    this.setRandomPosition();
+    this.setRandomSpeed();
 };
+
+Enemy.prototype.setRandomSpeed = function(){
+    this.speed = 250 + Math.floor(Math.random() * 300);
+}
+
+Enemy.prototype.setRandomPosition = function(){
+    var enemyRow = 0 + Math.floor(Math.random() * 3);
+    this.x = -80;
+    this.y = 65 + 83*enemyRow;
+}
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+    this.x += dt*this.speed;
+    if(this.x > 505) {
+        this.setRandomPosition();
+        this.setRandomSpeed();
+    }
 };
 
 // Draw the enemy on the screen, required method for game
@@ -28,7 +40,7 @@ var Player = function(x, y) {
     this.y = y;
     this.sprite = 'images/char-boy.png';
 }
-Player.prototype.update = function(dt) {
+Player.prototype.update = function() {
     // Do nothing, most of the updating for instance variables
     // happens in the handleInput
 }
@@ -83,9 +95,13 @@ Player.prototype.handleInput = function(key) {
 // a handleInput() method.
 
 var allEnemies = [];
-var Enemy = new Enemy(0, 83);
-allEnemies.push(Enemy);
-player = new Player(202, 380);
+(function createEnemies(){
+    for(var i = 0; i < 3; i++) {
+        allEnemies.push(new Enemy());
+    }
+})();
+
+var player = new Player(202, 380);
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
