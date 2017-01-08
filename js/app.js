@@ -10,7 +10,6 @@ var GameConditionEnum = {
  */
 var GameState = function(){
     this.gameCondition = GameConditionEnum.Start;
-
     this.score = 0;
     this.scoreX = 10;
     this.scoreY = 80;
@@ -19,25 +18,33 @@ var GameState = function(){
     this.highScoreX = 10;
     this.highScoreY = 110;
 
+    this.timeLeftInSeconds = 300;
+    this.timeX = 300
+    this.timeY = 80;
+
     this.changeScoreBy = function(scoreChange) {
         this.score += scoreChange;
         if(this.score > this.highScore) {
             this.highScore = this.score;
         }
-        else if(this.score < 0){
-            this.lostGame();
+    }
+    this.update = function(dt) {
+        this.timeLeftInSeconds = this.timeLeftInSeconds - dt;
+        if(this.timeLeftInSeconds < 0) {
+            this.gameCondition = GameConditionEnum.Start;
         }
     }
-    this.lostGame = function() {
-        this.score = 0;
-        this.gameCondition = GameConditionEnum.Start;
-    }
-
     this.render = function() {
         ctx.fillStyle = "yellow";
         ctx.font = "32px sans-serif";
         ctx.fillText("Score: " + this.score, this.scoreX, this.scoreY);
         ctx.fillText("High Score: " + this.highScore, this.highScoreX, this.highScoreY);
+        ctx.fillText("Tick Tock: " + Math.round(this.timeLeftInSeconds), this.timeX, this.timeY);
+    }
+    this.reset = function() {
+        this.timeLeftInSeconds = 300;
+        this.score = 0;
+        // High score should not be reset, will only be reset on reloading page
     }
 };
 
@@ -83,12 +90,15 @@ Enemy.prototype.getRandomPosition = function(){
 Enemy.prototype.update = function(dt) {
     this.x += dt*this.speed;
     if(this.x > 505) {
-        var position = this.getRandomPosition();
-        this.speed = this.getRandomSpeed();
-        this.x = position.x;
-        this.y = position.y;
+        this.reset();
     }
 };
+Enemy.prototype.reset = function() {
+    var position = this.getRandomPosition();
+    this.speed = this.getRandomSpeed();
+    this.x = position.x;
+    this.y = position.y;
+}
 
 var Player = function() {
     var sprite = 'images/char-boy.png';
@@ -116,7 +126,6 @@ Player.prototype.update = function() {
         for(var i = 0; i < allEnemies.length ;i++) {
             if(Math.abs(allEnemies[i].x - this.x) <= 60 &&
                 Math.abs(allEnemies[i].y - this.y) <= 20) {
-                gameState.lostGame();
                 collided = true;
             }
         }
@@ -124,10 +133,16 @@ Player.prototype.update = function() {
         return collided;
     }
 
-    if(onWater.call(this) || collisionOccured.call(this)) {
-        this.x = this.PLAYERSTARTX;
-        this.y = this.PLAYERSTARTY;
+    if(collisionOccured.call(this)) {
+        gameState.gameCondition = GameConditionEnum.Start;
     }
+    else if(onWater.call(this)) {
+        this.reset();
+    }
+}
+Player.prototype.reset = function() {
+    this.x = this.PLAYERSTARTX;
+    this.y = this.PLAYERSTARTY;
 }
 Player.prototype.handleInput = function(key) {
 

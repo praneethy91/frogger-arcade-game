@@ -46,9 +46,7 @@ var Engine = function(global) {
          * our update function since it may be used for smooth animation.
          */
         if(gameState.gameCondition === GameConditionEnum.Start) {
-            toggleMenu('inline');
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            reset();
         }
         else if(gameState.gameCondition === GameConditionEnum.Playing)
         {
@@ -104,6 +102,7 @@ var Engine = function(global) {
             enemy.update(dt);
         });
         player.update();
+        gameState.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -180,7 +179,15 @@ var Engine = function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        toggleMenu('inline');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        allEnemies.forEach(function(enemy) {
+            enemy.reset();
+        });
+
+        player.reset();
+        gameState.reset();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
