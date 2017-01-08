@@ -1,3 +1,31 @@
+var GameConditionEnum = {
+    Lose: 0,
+    Playing: 1,
+    Win: 2,
+};
+
+/* Will create only one object of this class so using functional class pattern
+ * as there will be no degradation of performance
+ */
+var GameState = function(){
+    this.gameCondition = GameConditionEnum.Playing;
+    this.score = 0;
+    this.x = 10;
+    this.y = 80;
+    this.changeScoreBy = function(scoreChange) {
+        this.score += scoreChange;
+        if(this.score < 0){
+            this.score = 0;
+            this.gameCondition = GameConditionEnum.Lose;
+        }
+    }
+    this.render = function() {
+        ctx.fillStyle = "yellow";
+        ctx.font = "32px sans-serif";
+        ctx.fillText("Score: " + this.score, this.x, this.y);
+    }
+};
+
 //Superclass of all the renderable objects in game
 var Entity = function(sprite, x, y) {
     this.sprite = sprite;
@@ -49,6 +77,7 @@ Enemy.prototype.update = function(dt) {
 
 var Player = function() {
     var sprite = 'images/char-boy.png';
+    this.score = 0;
     Entity.call(this, sprite, this.PLAYERSTARTX, this.PLAYERSTARTY);
 }
 Player.prototype = Object.create(Entity.prototype);
@@ -60,6 +89,7 @@ Player.prototype.update = function() {
 
     function winPosition(){
         if(this.y === this.PLAYERSTARTY - 83*5) {
+            gameState.changeScoreBy(50);
             return true;
         }
 
@@ -71,6 +101,7 @@ Player.prototype.update = function() {
         for(var i = 0; i < allEnemies.length ;i++) {
             if(Math.abs(allEnemies[i].x - this.x) <= 60 &&
                 Math.abs(allEnemies[i].y - this.y) <= 20) {
+                gameState.changeScoreBy(-100);
                 collided = true;
             }
         }
@@ -126,6 +157,11 @@ Player.prototype.handleInput = function(key) {
 
     handleChange.call(this, changeX, changeY);
 }
+
+/* Instantiating the game state. The game state is modified in update methods
+ * of the enemies or/and player.
+*/
+var gameState = new GameState();
 
 // Instantiating the enemy array and the player.
 var allEnemies = [];
