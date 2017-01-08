@@ -36,22 +36,47 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 Player.prototype.handleInput = function(key) {
+
+    function handleChange(changeX, changeY) {
+        if(withinBounds.call(this, changeX, changeY)) {
+            this.x = this.x + changeX;
+            this.y = this.y + changeY;
+        }
+
+        function withinBounds(changeX, changeY) {
+            var newX = this.x + changeX;
+            var newY = this.y + changeY;
+            if(newX >= 0 && newX <= 490 && newY >=-80 && newY <= 400) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
     if(key === undefined) {
         return;
     }
 
+    var changeX = 0, changeY = 0;
     if(key === 'left') {
-        this.x -= 101;
+        changeX = -101;
+        changeY = 0;
     }
     else if(key === 'right') {
-        this.x += 101;
+        changeX = 101;
+        changeY = 0;
     }
     else if(key === 'up') {
-        this.y -= 83;
+        changeX = 0;
+        changeY = -83;
     }
     else if(key === 'down') {
-        this.y += 83;
+        changeX = 0;
+        changeY = 83;
     }
+
+    handleChange.call(this, changeX, changeY);
 }
 // Now write your own player class
 // This class requires an update(), render() and
