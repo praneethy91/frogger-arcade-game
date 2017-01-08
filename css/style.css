@@ -1,3 +1,32 @@
 body {
+}
+
+h1 {
     text-align: center;
+}
+#game {
+    position: relative;
+}
+
+canvas {
+}
+
+img:hover {
+    cursor: pointer;
+}
+
+.player {
+    display: inline;
+    margin: 0 30px;
+}
+
+#menu-overlay {
+    width: 505px;
+    height: 606px;
+}
+
+#menu-overlay,
+canvas {
+    position: absolute;
+    right: calc((100% - 505px)/2);
 }

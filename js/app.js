@@ -2,13 +2,14 @@ var GameConditionEnum = {
     Lose: 0,
     Playing: 1,
     Win: 2,
+    Start: 3
 };
 
 /* Will create only one object of this class so using functional class pattern
  * as there will be no degradation of performance
  */
 var GameState = function(){
-    this.gameCondition = GameConditionEnum.Playing;
+    this.gameCondition = GameConditionEnum.Start;
 
     this.score = 0;
     this.scoreX = 10;
@@ -29,7 +30,7 @@ var GameState = function(){
     }
     this.lostGame = function() {
         this.score = 0;
-        this.gameCondition = GameConditionEnum.Lose;
+        this.gameCondition = GameConditionEnum.Start;
     }
 
     this.render = function() {
@@ -101,7 +102,7 @@ Player.prototype.PLAYERSTARTY = 380;
 Player.prototype.constructor = Player;
 Player.prototype.update = function() {
 
-    function winPosition(){
+    function onWater(){
         if(this.y === this.PLAYERSTARTY - 83*5) {
             gameState.changeScoreBy(50);
             return true;
@@ -123,7 +124,7 @@ Player.prototype.update = function() {
         return collided;
     }
 
-    if(winPosition.call(this) || collisionOccured.call(this)) {
+    if(onWater.call(this) || collisionOccured.call(this)) {
         this.x = this.PLAYERSTARTX;
         this.y = this.PLAYERSTARTY;
     }
@@ -196,3 +197,22 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+function toggleMenu(display) {
+    var playerMenu = document.getElementsByClassName('player');
+    for(var i = 0; i < playerMenu.length; i++) {
+        playerMenu[i].style.display = display;
+    }
+    var header = document.getElementsByTagName('h1')[0];
+    header.style.display = display === 'none' ? display : 'block';
+}
+
+window.onload = function() {
+    var playerSprites = document.getElementsByTagName('img');
+    for(var i = 0; i < playerSprites.length; i++) {
+        playerSprites[i].addEventListener('click', function(e){
+            gameState.gameCondition = GameConditionEnum.Playing;
+            player.sprite = e.currentTarget.getAttribute('data-src');
+        });
+    }
+}
