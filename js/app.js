@@ -41,6 +41,8 @@ var GameState = function(){
     this.livesX = 300;
     this.livesY = 110;
 
+    this.previousScore = 0;
+
     this.changeScoreBy = function(scoreChange) {
         this.score += scoreChange;
         if(this.score > this.highScore) {
@@ -123,7 +125,6 @@ Enemy.prototype.reset = function() {
 
 var Player = function() {
     var sprite = 'images/char-boy.png';
-    this.score = 0;
     Entity.call(this, sprite, this.PLAYERSTARTX, this.PLAYERSTARTY);
 }
 Player.prototype = Object.create(Entity.prototype);
@@ -156,6 +157,7 @@ Player.prototype.update = function() {
 
     if(collisionOccured.call(this)) {
         if(gameState.lives === 1){
+            gameState.previousScore = gameState.score;
             gameState.gameCondition = GameConditionEnum.Start;
         }
         else {
@@ -333,12 +335,19 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode]);
 });
 
-function toggleMenu(display) {
+function toggleMenu(display, previousScore) {
     var playerMenu = document.getElementsByClassName('player');
     for(var i = 0; i < playerMenu.length; i++) {
         playerMenu[i].style.display = display;
     }
-    var header = document.getElementsByTagName('h1')[0];
+    var header = document.getElementById('choose-player-header');
+    header.style.display = display === 'none' ? display : 'block';
+
+    header = document.getElementById('previous-score-header');
+    header.innerHTML = "Previous Score: " + previousScore;
+    header.style.display = display === 'none' ? display : 'block';
+
+    header = document.getElementById('rules-header');
     header.style.display = display === 'none' ? display : 'block';
 }
 

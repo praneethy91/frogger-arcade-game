@@ -46,8 +46,6 @@ var Engine = function(global) {
          * our update function since it may be used for smooth animation.
          */
         if(gameState.gameCondition === GameConditionEnum.Start) {
-            gem = new Gem();
-            heart = new Heart();
             reset();
         }
         else if(gameState.gameCondition === GameConditionEnum.Win) {
@@ -57,7 +55,7 @@ var Engine = function(global) {
         }
         else if(gameState.gameCondition === GameConditionEnum.Playing)
         {
-            toggleMenu('none');
+            toggleMenu('none', gameState.previousScore);
             update(dt);
             render();
         }
@@ -190,7 +188,7 @@ var Engine = function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        toggleMenu('inline');
+        toggleMenu('inline', gameState.previousScore);
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         allEnemies.forEach(function(enemy) {
@@ -199,6 +197,8 @@ var Engine = function(global) {
 
         player.reset();
         gameState.reset();
+        gem = new Gem();
+        heart = new Heart();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
