@@ -8,15 +8,15 @@ var GameConditionEnum = {
 var GemSprites = [
     {
         sprite: 'images/GemBlue.png',
-        value: 100
+        value: 50
     },
     {
         sprite: 'images/GemGreen.png',
-        value: 200
+        value: 100
     },
     {
         sprite: 'images/GemOrange.png',
-        value: 500
+        value: 200
     }
 ];
 
