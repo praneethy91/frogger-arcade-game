@@ -13,7 +13,6 @@
  * the canvas' context (ctx) object globally available to make writing app.js
  * a little simpler to work with.
  */
-
 var Engine = function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -42,29 +41,25 @@ var Engine = function(global) {
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
 
-        if(gameState.gameCondition === GameConditionEnum.Start) {
+        if (gameState.gameCondition === GameConditionEnum.Start) {
             // Do nothing: the game is showing up the game menu
-        }
-        else if(gameState.gameCondition === GameConditionEnum.Win) {
+        } else if (gameState.gameCondition === GameConditionEnum.Win) {
 
             // Only reset the collectibles and player and keep playing the game
             player.reset();
             gem.reset();
             heart.reset();
             gameState.gameCondition = GameConditionEnum.Playing;
-        }
-        else if(gameState.gameCondition === GameConditionEnum.Playing)
-        {
+        } else if (gameState.gameCondition === GameConditionEnum.Playing) {
             /* Call our update pass along the time delta to
-            * our update function since it may be used for smooth animation.
-            */
+             * our update function since it may be used for smooth animation.
+             */
             update(dt);
 
             /* reset the engine for game start showing menu */
-            if(gameState.gameCondition === GameConditionEnum.Start) {
+            if (gameState.gameCondition === GameConditionEnum.Start) {
                 reset();
-            }
-            else {
+            } else {
                 render();
             }
         }
@@ -126,12 +121,12 @@ var Engine = function(global) {
          * for that particular row of the game level.
          */
         var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
+                'images/water-block.png', // Top row is water
+                'images/stone-block.png', // Row 1 of 3 of stone
+                'images/stone-block.png', // Row 2 of 3 of stone
+                'images/stone-block.png', // Row 3 of 3 of stone
+                'images/grass-block.png', // Row 1 of 2 of grass
+                'images/grass-block.png' // Row 2 of 2 of grass
             ],
             numRows = 6,
             numCols = 5,
@@ -156,7 +151,7 @@ var Engine = function(global) {
         /* Necessary since the player's head reaches an area which is redrawn
          * with the transparent alpha value of the water sprite so need to
          * clear the top of the player's head.
-        */
+         */
         removeArtifacts();
 
         /* Hre is where all the objects in the game are rendered */
@@ -167,12 +162,12 @@ var Engine = function(global) {
      * tick. Its purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
-     function removeArtifacts() {
+    function removeArtifacts() {
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, 50);
         /*The below one is not necessary as the player will not move in that area*/
         ctx.fillRect(0, 586, canvas.width, canvas.height - 586);
-     }
+    }
 
     function renderEntities() {
         /* Loop through all of the objects the game like enemies, player,
@@ -203,7 +198,7 @@ var Engine = function(global) {
 
         player.reset();
         gameState.reset();
-        gem.reset()
+        gem.reset();
         heart.reset();
     }
 

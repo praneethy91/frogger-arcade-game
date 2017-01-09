@@ -10,8 +10,7 @@ var GameConditionEnum = {
 };
 
 /* The gems information, images and their values */
-var GemSprites = [
-    {
+var GemSprites = [{
         sprite: 'images/GemBlue.png',
         value: 50
     },
@@ -28,7 +27,7 @@ var GemSprites = [
 /* We Will create only one object of the GameState class so using functional
  * class pattern as there will be no degradation of performance.
  */
-var GameState = function(){
+var GameState = function() {
     this.gameCondition = GameConditionEnum.Start;
     this.score = 0;
     this.scoreX = 10;
@@ -39,7 +38,7 @@ var GameState = function(){
     this.highScoreY = 110;
 
     this.timeLeftInSeconds = 300;
-    this.timeX = 300
+    this.timeX = 300;
     this.timeY = 80;
 
     this.lives = 1;
@@ -50,16 +49,16 @@ var GameState = function(){
 
     this.changeScoreBy = function(scoreChange) {
         this.score += scoreChange;
-        if(this.score > this.highScore) {
+        if (this.score > this.highScore) {
             this.highScore = this.score;
         }
-    }
+    };
     this.update = function(dt) {
         this.timeLeftInSeconds = this.timeLeftInSeconds - dt;
-        if(this.timeLeftInSeconds < 0) {
+        if (this.timeLeftInSeconds < 0) {
             this.endGame();
         }
-    }
+    };
     this.render = function() {
         ctx.fillStyle = "yellow";
         ctx.font = "32px sans-serif";
@@ -67,23 +66,23 @@ var GameState = function(){
         ctx.fillText("High Score: " + this.highScore, this.highScoreX, this.highScoreY);
         ctx.fillText("Time Left: " + Math.round(this.timeLeftInSeconds), this.timeX, this.timeY);
         ctx.fillText("Lives: " + this.lives, this.livesX, this.livesY);
-    }
+    };
     this.reset = function() {
         this.timeLeftInSeconds = 300;
         this.score = 0;
         this.lives = 1;
         // High score should not be reset, will only be reset on reloading page
-    }
+    };
     //This function is called in the end game condition:
     this.endGame = function() {
         gameState.previousScore = gameState.score;
         this.gameCondition = GameConditionEnum.Start;
-    }
+    };
     //The function is called if player has reached water, or any other win condition
     this.winGame = function() {
         gameState.changeScoreBy(50);
         this.gameCondition = GameConditionEnum.Win;
-    }
+    };
 };
 
 //Entity class is the superclass of the Enemy and the Player classes
@@ -91,7 +90,7 @@ var Entity = function(sprite, x, y) {
     this.sprite = sprite;
     this.x = x;
     this.y = y;
-}
+};
 Entity.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -109,27 +108,27 @@ Enemy.prototype.constructor = Enemy;
 /* getRandomSpeed() is an Enemy prototype function as it's specific to
  * how the enemy moves in the game. Returns the speed of the enemy.
  */
-Enemy.prototype.getRandomSpeed = function(){
+Enemy.prototype.getRandomSpeed = function() {
     var baseSpeed = 250;
     var rangeSpeed = 300;
     return baseSpeed + Math.floor(Math.random() * rangeSpeed);
-}
+};
 
 /* The enemy get's placed at a random position in one of the three rows
  * of the game board as a starting point.
  */
-Enemy.prototype.getRandomPosition = function(){
+Enemy.prototype.getRandomPosition = function() {
     var position = {};
     var enemyRow = 0 + Math.floor(Math.random() * 3);
     position.x = -80;
-    position.y = 65 + 83*enemyRow;
+    position.y = 65 + 83 * enemyRow;
     return position;
-}
+};
 
 // Position updated based on speed and resets itself if crosses board
 Enemy.prototype.update = function(dt) {
-    this.x += dt*this.speed;
-    if(this.x > 505) {
+    this.x += dt * this.speed;
+    if (this.x > 505) {
         this.reset();
     }
 };
@@ -138,13 +137,13 @@ Enemy.prototype.reset = function() {
     this.speed = this.getRandomSpeed();
     this.x = position.x;
     this.y = position.y;
-}
+};
 
 // Player class is a subclass of the Entity class following pseudoclassical prototypal pattern
 var Player = function() {
     var sprite = 'images/char-boy.png';
     Entity.call(this, sprite, this.PLAYERSTARTX, this.PLAYERSTARTY);
-}
+};
 Player.prototype = Object.create(Entity.prototype);
 Player.prototype.constructor = Player;
 
@@ -153,8 +152,8 @@ Player.prototype.PLAYERSTARTY = 380;
 Player.prototype.update = function() {
 
     /* Determines if the player reached the water tiles */
-    function onWater(){
-        if(this.y === this.PLAYERSTARTY - 83*5) {
+    function onWater() {
+        if (this.y === this.PLAYERSTARTY - 83 * 5) {
             return true;
         }
 
@@ -164,8 +163,8 @@ Player.prototype.update = function() {
     /* Determines if the player collided with one of the enemies */
     function collisionOccured() {
         var collided = false;
-        for(var i = 0; i < allEnemies.length ;i++) {
-            if(Math.abs(allEnemies[i].x - this.x) <= 60 &&
+        for (var i = 0; i < allEnemies.length; i++) {
+            if (Math.abs(allEnemies[i].x - this.x) <= 60 &&
                 Math.abs(allEnemies[i].y - this.y) <= 20) {
                 collided = true;
             }
@@ -177,23 +176,21 @@ Player.prototype.update = function() {
     /* Change game state based on whether the collision occured
      * or whether the player is on water.
      */
-    if(collisionOccured.call(this)) {
-        if(gameState.lives === 1){
+    if (collisionOccured.call(this)) {
+        if (gameState.lives === 1) {
             gameState.endGame();
-        }
-        else {
+        } else {
             this.reset();
             gameState.lives -= 1;
         }
-    }
-    else if(onWater.call(this)) {
+    } else if (onWater.call(this)) {
         gameState.winGame();
     }
-}
+};
 Player.prototype.reset = function() {
     this.x = this.PLAYERSTARTX;
     this.y = this.PLAYERSTARTY;
-}
+};
 
 /* Handles change in position of the player based on the keyboard input
  *
@@ -201,7 +198,7 @@ Player.prototype.reset = function() {
 Player.prototype.handleInput = function(key) {
 
     function handleChange(changeX, changeY) {
-        if(withinBounds.call(this, changeX, changeY)) {
+        if (withinBounds.call(this, changeX, changeY)) {
             this.x = this.x + changeX;
             this.y = this.y + changeY;
         }
@@ -209,7 +206,7 @@ Player.prototype.handleInput = function(key) {
         function withinBounds(changeX, changeY) {
             var newX = this.x + changeX;
             var newY = this.y + changeY;
-            if(newX >= 0 && newX <= 490 && newY >=-80 && newY <= 400) {
+            if (newX >= 0 && newX <= 490 && newY >= -80 && newY <= 400) {
                 return true;
             }
 
@@ -217,30 +214,28 @@ Player.prototype.handleInput = function(key) {
         }
     }
 
-    if(key === undefined) {
+    if (key === undefined) {
         return;
     }
 
-    var changeX = 0, changeY = 0;
-    if(key === 'left') {
+    var changeX = 0,
+        changeY = 0;
+    if (key === 'left') {
         changeX = -101;
         changeY = 0;
-    }
-    else if(key === 'right') {
+    } else if (key === 'right') {
         changeX = 101;
         changeY = 0;
-    }
-    else if(key === 'up') {
+    } else if (key === 'up') {
         changeX = 0;
         changeY = -83;
-    }
-    else if(key === 'down') {
+    } else if (key === 'down') {
         changeX = 0;
         changeY = 83;
     }
 
     handleChange.call(this, changeX, changeY);
-}
+};
 
 //Superclass of the Heart and Gem classes
 var Collectible = function(sprite, probabilityToOccurOnBoard) {
@@ -252,18 +247,18 @@ var Collectible = function(sprite, probabilityToOccurOnBoard) {
     var position = this.getRandomPosition();
     this.x = position.x;
     this.y = position.y;
-}
+};
 /* The collectible shows up in a random position on the board and whether
  * it shows up is based on the probability of the collectible occuring on the board.
  */
 Collectible.prototype.getRandomPosition = function() {
     var position = {};
-    var gemColumn = 0 + Math.floor(Math.random() * 5 * (1/this.probabilityToOccurOnBoard));
+    var gemColumn = 0 + Math.floor(Math.random() * 5 * (1 / this.probabilityToOccurOnBoard));
     var gemRow = 0 + Math.floor(Math.random() * 3);
-    position.x = 0 + 101*gemColumn;
-    position.y = 65 + 83*gemRow;
+    position.x = 0 + 101 * gemColumn;
+    position.y = 65 + 83 * gemRow;
     return position;
-}
+};
 /*
  * This function is because the collectible is too big and want to scale it down
    at the center of the image
@@ -272,24 +267,24 @@ Collectible.prototype.render = function() {
     ctx.save();
     /* 50 is half the width of the png file
      * and 85 is half the height of the png file
-    */
+     */
     ctx.translate(this.x + 50, this.y + 85);
     ctx.scale(0.5, 0.5);
     ctx.drawImage(Resources.get(this.sprite), -50, -80);
     ctx.restore();
-}
+};
 
 // Returns if the player has successfully collected the gem based on the positions
 Collectible.prototype.hasPlayerCollected = function() {
     return (Math.abs(this.x - player.x) <= 60 &&
         Math.abs(this.y - player.y) <= 20);
-}
+};
 
 // Make the gem go off the board
 Collectible.prototype.disappear = function() {
     this.x = 1000;
     this.y = 1000;
-}
+};
 
 // A subclass of the superclass Collectible
 var Gem = function() {
@@ -298,16 +293,16 @@ var Gem = function() {
     Collectible.call(this, sprite, 1);
 
     this.value = GemSprites[index].value;
-}
+};
 Gem.prototype = Object.create(Collectible.prototype);
 Gem.prototype.constructor = Gem;
 
 Gem.prototype.update = function() {
-    if(this.hasPlayerCollected()) {
+    if (this.hasPlayerCollected()) {
         gameState.changeScoreBy(this.value);
         this.disappear();
     }
-}
+};
 Gem.prototype.getRandomGemSpriteIndex = function() {
 
     /* The spec indicates the probability of occurrence of the gems
@@ -320,49 +315,52 @@ Gem.prototype.getRandomGemSpriteIndex = function() {
     };
 
     // Return one of the gem indexes based on their relative probabilities of occuring
-    var i, sum=0, r=Math.random();
+    var i, sum = 0,
+        r = Math.random();
     for (i in spec) {
-        sum += spec[i];
-        if (r <= sum) {
-            return i;
+        if (spec.hasOwnProperty(i)) {
+            sum += spec[i];
+            if (r <= sum) {
+                return i;
+            }
         }
     }
-}
+};
 Gem.prototype.reset = function() {
     var index = this.getRandomGemSpriteIndex();
     var sprite = GemSprites[index].sprite;
     Collectible.call(this, sprite, 1);
 
     this.value = GemSprites[index].value;
-}
+};
 
 // A subclass on the superclass Collectible
 var Heart = function() {
     var sprite = 'images/Heart.png';
     Collectible.call(this, sprite, 0.25);
-}
+};
 Heart.prototype = Object.create(Collectible.prototype);
 Heart.prototype.constructor = Heart;
 
 Heart.prototype.update = function() {
-    if(this.hasPlayerCollected()) {
+    if (this.hasPlayerCollected()) {
         gameState.lives += 1;
         this.disappear();
     }
-}
+};
 Heart.prototype.reset = function() {
     var sprite = 'images/Heart.png';
     Collectible.call(this, sprite, 0.25);
-}
+};
 
 /* Instantiating the game state. The game state is modified in update methods
  * of the enemies or/and player.
-*/
+ */
 var gameState = new GameState();
 
 // Instantiating the enemy array, the player and a random gem on random location.
 var allEnemies = [];
-for(var i = 0; i < 3; i++) {
+for (var i = 0; i < 3; i++) {
     allEnemies.push(new Enemy());
 }
 var player = new Player();
@@ -384,7 +382,7 @@ document.addEventListener('keyup', function(e) {
 // This functions toggles the ingame menu
 function toggleMenu(display, previousScore) {
     var playerMenu = document.getElementsByClassName('player');
-    for(var i = 0; i < playerMenu.length; i++) {
+    for (var i = 0; i < playerMenu.length; i++) {
         playerMenu[i].style.display = display;
     }
     var header = document.getElementById('choose-player-header');
@@ -403,11 +401,12 @@ function toggleMenu(display, previousScore) {
  */
 window.onload = function() {
     var playerSprites = document.getElementsByTagName('img');
-    for(var i = 0; i < playerSprites.length; i++) {
-        playerSprites[i].addEventListener('click', function(e){
-            toggleMenu('none', gameState.previousScore);
-            gameState.gameCondition = GameConditionEnum.Playing;
-            player.sprite = e.currentTarget.getAttribute('data-src');
-        });
+    var playerSpriteOnClick = function(e) {
+        toggleMenu('none', gameState.previousScore);
+        gameState.gameCondition = GameConditionEnum.Playing;
+        player.sprite = e.currentTarget.getAttribute('data-src');
+    };
+    for (var i = 0; i < playerSprites.length; i++) {
+        playerSprites[i].addEventListener('click', playerSpriteOnClick);
     }
-}
+};
