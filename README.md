@@ -38,6 +38,9 @@ The game terminates and take you back to the main menu, if:
   **_Have Fun and try to achieve your high score!!_**
 
 ## Limitations
-Be careful! Your high score resets if you refresh the game page.
+
+1. Be careful! Your high score resets if you refresh the game page.
+2. This game does not work on mobile devices.
 
 ## License
+Copyright (c) 2017 Praneeth Yenugutala. This project is licensed using MIT License. Feel free to contribute, fork or commit.
