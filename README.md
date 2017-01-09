@@ -41,3 +41,4 @@ The game terminates and take you back to the main menu, if:
 Be careful! Your high score resets if you refresh the game page.
 
 ## License
+Copyright (c) 2017 Praneeth Yenugutala. This project is licensed using MIT License. Feel free to contribute, fork or commit.
