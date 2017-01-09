@@ -47,10 +47,12 @@ var Engine = function(global) {
          */
         if(gameState.gameCondition === GameConditionEnum.Start) {
             gem = new Gem();
+            heart = new Heart();
             reset();
         }
         else if(gameState.gameCondition === GameConditionEnum.Win) {
             gem = new Gem();
+            heart = new Heart();
             gameState.gameCondition = GameConditionEnum.Playing;
         }
         else if(gameState.gameCondition === GameConditionEnum.Playing)
@@ -109,6 +111,7 @@ var Engine = function(global) {
         player.update();
         gameState.update(dt);
         gem.update();
+        heart.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -179,6 +182,7 @@ var Engine = function(global) {
         player.render();
         gameState.render();
         gem.render();
+        heart.render();
     }
 
     /* This function does nothing but it could have been a good place to
@@ -213,7 +217,8 @@ var Engine = function(global) {
         'images/char-princess-girl.png',
         'images/GemBlue.png',
         'images/GemGreen.png',
-        'images/GemOrange.png'
+        'images/GemOrange.png',
+        'images/Heart.png'
     ]);
     Resources.onReady(init);
 

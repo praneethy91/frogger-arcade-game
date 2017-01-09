@@ -37,6 +37,10 @@ var GameState = function(){
     this.timeX = 300
     this.timeY = 80;
 
+    this.lives = 1;
+    this.livesX = 300;
+    this.livesY = 110;
+
     this.changeScoreBy = function(scoreChange) {
         this.score += scoreChange;
         if(this.score > this.highScore) {
@@ -55,15 +59,17 @@ var GameState = function(){
         ctx.fillText("Score: " + this.score, this.scoreX, this.scoreY);
         ctx.fillText("High Score: " + this.highScore, this.highScoreX, this.highScoreY);
         ctx.fillText("Tick Tock: " + Math.round(this.timeLeftInSeconds), this.timeX, this.timeY);
+        ctx.fillText("Lives: " + this.lives, this.livesX, this.livesY);
     }
     this.reset = function() {
         this.timeLeftInSeconds = 300;
         this.score = 0;
+        this.lives = 1;
         // High score should not be reset, will only be reset on reloading page
     }
 };
 
-//Superclass of all the renderable objects in game
+//Superclass of the Enemy and the Player class
 var Entity = function(sprite, x, y) {
     this.sprite = sprite;
     this.x = x;
@@ -129,7 +135,6 @@ Player.prototype.update = function() {
 
     function onWater(){
         if(this.y === this.PLAYERSTARTY - 83*5) {
-            gameState.changeScoreBy(50);
             return true;
         }
 
@@ -150,9 +155,16 @@ Player.prototype.update = function() {
     }
 
     if(collisionOccured.call(this)) {
-        gameState.gameCondition = GameConditionEnum.Start;
+        if(gameState.lives === 1){
+            gameState.gameCondition = GameConditionEnum.Start;
+        }
+        else {
+            this.reset();
+            gameState.lives -= 1;
+        }
     }
     else if(onWater.call(this)) {
+        gameState.changeScoreBy(50);
         gameState.gameCondition = GameConditionEnum.Win;
         this.reset();
     }
@@ -205,22 +217,30 @@ Player.prototype.handleInput = function(key) {
     handleChange.call(this, changeX, changeY);
 }
 
-var Gem = function() {
-    var index = this.getRandomGemSpriteIndex();
-    var sprite = GemSprites[index].sprite;
+//Superclass of the Heart and Gem classes
+var Collectible = function(sprite, probabilityToOccurOnBoard) {
+    /* The parameter probabilityToOccurOnBoard is the probability that the collectible
+       will appear on the board for this turn
+    */
+    this.probabilityToOccurOnBoard = probabilityToOccurOnBoard;
+    this.sprite = sprite;
     var position = this.getRandomPosition();
-    Entity.call(this, sprite, position.x, position.y);
-
-    this.value = GemSprites[index].value;
+    this.x = position.x;
+    this.y = position.y;
 }
-Gem.prototype = Object.create(Entity.prototype);
-Gem.prototype.constructor = Gem;
-
+Collectible.prototype.getRandomPosition = function() {
+    var position = {};
+    var gemColumn = 0 + Math.floor(Math.random() * 5 * (1/this.probabilityToOccurOnBoard));
+    var gemRow = 0 + Math.floor(Math.random() * 3);
+    position.x = 0 + 101*gemColumn;
+    position.y = 65 + 83*gemRow;
+    return position;
+}
 /*
- * Overriding this function as the gem is too big and want to scale it down
+ * This function is because the collectible is too big and want to scale it down
    at the center of the image
  */
-Gem.prototype.render = function() {
+Collectible.prototype.render = function() {
     ctx.save();
     /* 50 is half the width of the png file
      * and 85 is half the height of the png file
@@ -230,20 +250,29 @@ Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), -50, -80);
     ctx.restore();
 }
+Collectible.prototype.hasPlayerCollected = function() {
+    return (Math.abs(this.x - player.x) <= 60 &&
+        Math.abs(this.y - player.y) <= 20);
+}
+Collectible.prototype.disappear = function() {
+    this.x = 1000;
+    this.y = 1000;
+}
+
+var Gem = function() {
+    var index = this.getRandomGemSpriteIndex();
+    var sprite = GemSprites[index].sprite;
+    Collectible.call(this, sprite, 1);
+
+    this.value = GemSprites[index].value;
+}
+Gem.prototype = Object.create(Collectible.prototype);
+Gem.prototype.constructor = Gem;
 Gem.prototype.update = function() {
-    if(Math.abs(this.x - player.x) <= 60 &&
-        Math.abs(this.y - player.y) <= 20) {
+    if(this.hasPlayerCollected()) {
         gameState.changeScoreBy(this.value);
         this.disappear();
     }
-}
-Gem.prototype.getRandomPosition = function() {
-    var position = {};
-    var gemColumn = 0 + Math.floor(Math.random() * 5);
-    var gemRow = 0 + Math.floor(Math.random() * 3);
-    position.x = 0 + 101*gemColumn;
-    position.y = 65 + 83*gemRow;
-    return position;
 }
 Gem.prototype.getRandomGemSpriteIndex = function() {
 
@@ -264,9 +293,19 @@ Gem.prototype.getRandomGemSpriteIndex = function() {
         }
     }
 }
-Gem.prototype.disappear = function() {
-    this.x = 1000;
-    this.y = 1000;
+
+var Heart = function() {
+    var sprite = 'images/Heart.png';
+    Collectible.call(this, sprite, 0.25);
+}
+Heart.prototype = Object.create(Collectible.prototype);
+Heart.prototype.constructor = Heart;
+
+Heart.prototype.update = function() {
+    if(this.hasPlayerCollected()) {
+        gameState.lives += 1;
+        this.disappear();
+    }
 }
 
 /* Instantiating the game state. The game state is modified in update methods
