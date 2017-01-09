@@ -65,7 +65,7 @@ var GameState = function(){
         ctx.font = "32px sans-serif";
         ctx.fillText("Score: " + this.score, this.scoreX, this.scoreY);
         ctx.fillText("High Score: " + this.highScore, this.highScoreX, this.highScoreY);
-        ctx.fillText("Tick Tock: " + Math.round(this.timeLeftInSeconds), this.timeX, this.timeY);
+        ctx.fillText("Time Left: " + Math.round(this.timeLeftInSeconds), this.timeX, this.timeY);
         ctx.fillText("Lives: " + this.lives, this.livesX, this.livesY);
     }
     this.reset = function() {
