@@ -42,22 +42,31 @@ var Engine = function(global) {
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
 
-        /* Call our update/render functions, pass along the time delta to
-         * our update function since it may be used for smooth animation.
-         */
         if(gameState.gameCondition === GameConditionEnum.Start) {
-            reset();
+            // Do nothing: the game is showing up the game menu
         }
         else if(gameState.gameCondition === GameConditionEnum.Win) {
-            gem = new Gem();
-            heart = new Heart();
+
+            // Only reset the collectibles and player and keep playing the game
+            player.reset();
+            gem.reset();
+            heart.reset();
             gameState.gameCondition = GameConditionEnum.Playing;
         }
         else if(gameState.gameCondition === GameConditionEnum.Playing)
         {
-            toggleMenu('none', gameState.previousScore);
+            /* Call our update pass along the time delta to
+            * our update function since it may be used for smooth animation.
+            */
             update(dt);
-            render();
+
+            /* reset the engine for game start showing menu */
+            if(gameState.gameCondition === GameConditionEnum.Start) {
+                reset();
+            }
+            else {
+                render();
+            }
         }
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -82,25 +91,19 @@ var Engine = function(global) {
     }
 
     /* This function is called by main (our game loop) and itself calls all
-     * of the functions which may need to update entity's data. Based on how
-     * you implement your collision detection (when two entities occupy the
-     * same space, for instance when your character should die), you may find
-     * the need to add an additional function call here. For now, we've left
-     * it commented out - you may or may not want to implement this
-     * functionality this way (you could just implement collision detection
-     * on the entities themselves within your app.js file).
+     * of the functions which may need to update each of the game
+     * entities's data.
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
     }
 
     /* This is called by the update function and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
-     * their update() methods. It will then call the update function for your
-     * player object. These update methods should focus purely on updating
-     * the data/properties related to the object. Do your drawing in your
-     * render methods.
+     * their update() methods. It will then call the update function for the
+     * player object and the collectibles objects. These update methods should
+     * focus purely on updating the data/properties related to the object.
+     * We do the drawing in the render methods of each of the objects.
      */
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
@@ -155,6 +158,8 @@ var Engine = function(global) {
          * clear the top of the player's head.
         */
         removeArtifacts();
+
+        /* Hre is where all the objects in the game are rendered */
         renderEntities();
     }
 
@@ -170,8 +175,8 @@ var Engine = function(global) {
      }
 
     function renderEntities() {
-        /* Loop through all of the objects within the allEnemies array and call
-         * the render function you have defined.
+        /* Loop through all of the objects the game like enemies, player,
+         * collectibles and call the render functions we have defined.
          */
         gem.render();
         heart.render();
@@ -183,25 +188,26 @@ var Engine = function(global) {
         gameState.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
+    /* Here we handle resetting the game state and objects and showing up the
+     * game menu for game.
      */
     function reset() {
-        toggleMenu('inline', gameState.previousScore);
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        toggleMenu('inline', gameState.previousScore);
+
         allEnemies.forEach(function(enemy) {
             enemy.reset();
         });
 
         player.reset();
         gameState.reset();
-        gem = new Gem();
-        heart = new Heart();
+        gem.reset()
+        heart.reset();
     }
 
-    /* Go ahead and load all of the images we know we're going to need to
+    /* We load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
      * all of these images are properly loaded our game will start.
      */
@@ -227,6 +233,7 @@ var Engine = function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+    Engine.reset = reset;
 };
 
 Engine(this);
