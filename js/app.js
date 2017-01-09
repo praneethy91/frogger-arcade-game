@@ -5,6 +5,21 @@ var GameConditionEnum = {
     Start: 3
 };
 
+var GemSprites = [
+    {
+        sprite: 'images/GemBlue.png',
+        value: 100
+    },
+    {
+        sprite: 'images/GemGreen.png',
+        value: 200
+    },
+    {
+        sprite: 'images/GemOrange.png',
+        value: 500
+    }
+];
+
 /* Will create only one object of this class so using functional class pattern
  * as there will be no degradation of performance
  */
@@ -121,6 +136,7 @@ Player.prototype.update = function() {
         return false;
     }
 
+    /* TODO: this is repeating with the gem collision as well */
     function collisionOccured() {
         var collided = false;
         for(var i = 0; i < allEnemies.length ;i++) {
@@ -137,6 +153,7 @@ Player.prototype.update = function() {
         gameState.gameCondition = GameConditionEnum.Start;
     }
     else if(onWater.call(this)) {
+        gameState.gameCondition = GameConditionEnum.Win;
         this.reset();
     }
 }
@@ -188,18 +205,82 @@ Player.prototype.handleInput = function(key) {
     handleChange.call(this, changeX, changeY);
 }
 
+var Gem = function() {
+    var index = this.getRandomGemSpriteIndex();
+    var sprite = GemSprites[index].sprite;
+    var position = this.getRandomPosition();
+    Entity.call(this, sprite, position.x, position.y);
+
+    this.value = GemSprites[index].value;
+}
+Gem.prototype = Object.create(Entity.prototype);
+Gem.prototype.constructor = Gem;
+
+/*
+ * Overriding this function as the gem is too big and want to scale it down
+   at the center of the image
+ */
+Gem.prototype.render = function() {
+    ctx.save();
+    /* 50 is half the width of the png file
+     * and 85 is half the height of the png file
+    */
+    ctx.translate(this.x + 50, this.y + 85);
+    ctx.scale(0.5, 0.5);
+    ctx.drawImage(Resources.get(this.sprite), -50, -80);
+    ctx.restore();
+}
+Gem.prototype.update = function() {
+    if(Math.abs(this.x - player.x) <= 60 &&
+        Math.abs(this.y - player.y) <= 20) {
+        gameState.changeScoreBy(this.value);
+        this.disappear();
+    }
+}
+Gem.prototype.getRandomPosition = function() {
+    var position = {};
+    var gemColumn = 0 + Math.floor(Math.random() * 5);
+    var gemRow = 0 + Math.floor(Math.random() * 3);
+    position.x = 0 + 101*gemColumn;
+    position.y = 65 + 83*gemRow;
+    return position;
+}
+Gem.prototype.getRandomGemSpriteIndex = function() {
+
+    /* The spec indicates the probability of occurrence of the gems
+     * Blue being most common, then green and orange being rarest
+     */
+    spec = {
+        0: 0.6,
+        1: 0.3,
+        2: 0.1
+    };
+
+    var i, sum=0, r=Math.random();
+    for (i in spec) {
+        sum += spec[i];
+        if (r <= sum) {
+            return i;
+        }
+    }
+}
+Gem.prototype.disappear = function() {
+    this.x = 1000;
+    this.y = 1000;
+}
+
 /* Instantiating the game state. The game state is modified in update methods
  * of the enemies or/and player.
 */
 var gameState = new GameState();
 
-// Instantiating the enemy array and the player.
+// Instantiating the enemy array, the player and a random gem on random location.
 var allEnemies = [];
-var player;
 for(var i = 0; i < 3; i++) {
     allEnemies.push(new Enemy());
 }
-player = new Player();
+var player = new Player();
+var gem = new Gem();
 
 //Adding the listener for the keys which move the player
 document.addEventListener('keyup', function(e) {

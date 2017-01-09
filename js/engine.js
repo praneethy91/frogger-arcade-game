@@ -46,7 +46,12 @@ var Engine = function(global) {
          * our update function since it may be used for smooth animation.
          */
         if(gameState.gameCondition === GameConditionEnum.Start) {
+            gem = new Gem();
             reset();
+        }
+        else if(gameState.gameCondition === GameConditionEnum.Win) {
+            gem = new Gem();
+            gameState.gameCondition = GameConditionEnum.Playing;
         }
         else if(gameState.gameCondition === GameConditionEnum.Playing)
         {
@@ -103,6 +108,7 @@ var Engine = function(global) {
         });
         player.update();
         gameState.update(dt);
+        gem.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -172,6 +178,7 @@ var Engine = function(global) {
 
         player.render();
         gameState.render();
+        gem.render();
     }
 
     /* This function does nothing but it could have been a good place to
@@ -203,7 +210,10 @@ var Engine = function(global) {
         'images/char-cat-girl.png',
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
-        'images/char-princess-girl.png'
+        'images/char-princess-girl.png',
+        'images/GemBlue.png',
+        'images/GemGreen.png',
+        'images/GemOrange.png'
     ]);
     Resources.onReady(init);
 
